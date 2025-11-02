@@ -87,11 +87,17 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
 CLERK_SECRET_KEY=sk_test_your_key_here
 
 # Main Website API URL
+# Local: http://localhost:3000/api
+# Production: https://www.leli.rentals/api
 NEXT_PUBLIC_MAIN_API_URL=http://localhost:3000/api
 
 # Admin Dashboard URL
+# Local: http://localhost:3001
+# Production: https://admin.leli.rentals
 NEXT_PUBLIC_ADMIN_DASHBOARD_URL=http://localhost:3001
 ```
+
+**Note**: For production deployment on Vercel, set `NEXT_PUBLIC_MAIN_API_URL=https://www.leli.rentals/api`. The API client automatically uses the production URL when `NODE_ENV=production`.
 
 ### 4. Run Development Server
 
@@ -258,6 +264,7 @@ MIT License - See [LICENSE.md](LICENSE.md) for details
 
 ## 🔗 Links
 
+- **Production Admin Dashboard**: [admin.leli.rentals](https://admin.leli.rentals)
 - **Main Website**: [www.leli.rentals](https://www.leli.rentals)
 - **GitHub Repository**: [evince-dev-254/admin.leli.rentals](https://github.com/evince-dev-254/admin.leli.rentals)
 - **Documentation**: See API_SETUP_GUIDE.md and RESPONSIVE_DESIGN_GUIDE.md

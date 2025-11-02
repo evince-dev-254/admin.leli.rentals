@@ -1,8 +1,18 @@
 import axios, { AxiosInstance, AxiosError } from 'axios'
 
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // Production: connect to main app at www.leli.rentals
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.NEXT_PUBLIC_MAIN_API_URL || 'https://www.leli.rentals/api'
+  }
+  // Development: use localhost or custom URL
+  return process.env.NEXT_PUBLIC_MAIN_API_URL || 'http://localhost:3000/api'
+}
+
 // Create axios instance pointing to main site API
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_MAIN_API_URL || 'http://localhost:3000/api',
+  baseURL: getApiUrl(),
   withCredentials: true, // Important for Clerk cookie-based auth
   headers: {
     'Content-Type': 'application/json',
@@ -12,7 +22,12 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor for logging
 apiClient.interceptors.request.use(
   (config) => {
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
+    const baseURL = config.baseURL || getApiUrl()
+    const fullURL = `${baseURL}${config.url}`
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${fullURL}`)
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`[Production API] Connecting from admin.leli.rentals to www.leli.rentals`)
+    }
     return config
   },
   (error) => {

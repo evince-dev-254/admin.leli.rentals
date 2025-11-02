@@ -4,7 +4,12 @@ This guide explains how to connect the Leli Admin Dashboard to the main website 
 
 ## Overview
 
-The Admin Dashboard connects to the main website's backend API to fetch and manage data. The dashboard is configured to communicate with the main site at `http://localhost:3000/api` for local development.
+The Admin Dashboard connects to the main website's backend API to fetch and manage data.
+
+- **Production**: Admin dashboard at `https://admin.leli.rentals` connects to main app at `https://www.leli.rentals/api`
+- **Development**: Dashboard at `http://localhost:3001` connects to main app at `http://localhost:3000/api`
+
+The API client automatically detects the environment and uses the appropriate URL.
 
 ## Prerequisites
 
@@ -190,10 +195,40 @@ All API endpoints should return data in this format:
 
 ## Production Deployment
 
-1. **Update Environment Variables**: Set production URLs for both API and dashboard
-2. **Configure CORS**: Update CORS settings on the main site to include production dashboard domain
-3. **SSL/HTTPS**: Ensure both sites use HTTPS in production
-4. **Clerk Keys**: Use production Clerk keys (not test keys)
+### Production URLs
+
+- **Admin Dashboard**: `https://admin.leli.rentals`
+- **Main App API**: `https://www.leli.rentals/api`
+
+### Vercel Environment Variables
+
+Set these in your Vercel project settings:
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_your_production_key
+CLERK_SECRET_KEY=sk_live_your_production_key
+NEXT_PUBLIC_MAIN_API_URL=https://www.leli.rentals/api
+NEXT_PUBLIC_ADMIN_DASHBOARD_URL=https://admin.leli.rentals
+```
+
+### Critical Steps
+
+1. **Configure CORS on Main App**: Update CORS settings on `www.leli.rentals` to allow requests from `https://admin.leli.rentals`
+
+   Example Express.js CORS configuration:
+   ```javascript
+   app.use(cors({
+     origin: [
+       'https://admin.leli.rentals',
+       'http://localhost:3001' // Keep for testing
+     ],
+     credentials: true
+   }))
+   ```
+
+2. **SSL/HTTPS**: Both sites must use HTTPS in production
+3. **Clerk Keys**: Use production Clerk keys (pk_live_* and sk_live_*)
+4. **Cookie Domain**: Ensure Clerk cookies work across subdomains if needed
 
 ## Security Notes
 
