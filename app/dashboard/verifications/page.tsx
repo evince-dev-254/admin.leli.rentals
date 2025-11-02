@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,7 +26,6 @@ import {
 export default function VerificationsPage() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { toast } = useToast()
   const [allUsers, setAllUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
