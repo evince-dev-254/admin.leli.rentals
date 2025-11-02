@@ -54,6 +54,16 @@ export default function VerificationsPage() {
     try {
       const data = await usersService.getAllUsers()
       if (data.success && data.users) {
+        console.log('Fetched users:', data.users.length)
+        // Debug: Log user with documents
+        const usersWithDocs = data.users.filter(u => u.unsafeMetadata?.verificationDocuments)
+        console.log('Users with verification documents:', usersWithDocs.length)
+        if (usersWithDocs.length > 0) {
+          console.log('Sample user with docs:', {
+            name: `${usersWithDocs[0].firstName} ${usersWithDocs[0].lastName}`,
+            docs: usersWithDocs[0].unsafeMetadata?.verificationDocuments
+          })
+        }
         setAllUsers(data.users)
         setFilteredUsers(data.users)
       }
@@ -137,11 +147,12 @@ export default function VerificationsPage() {
       setSelectedUser(null)
       setRejectionReason('')
       fetchAllUsers() // Refresh the list
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving verification:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unknown error occurred'
       toast({
         title: '❌ Approval Failed',
-        description: error instanceof Error ? error.message : 'Error approving verification',
+        description: errorMessage,
         variant: 'destructive',
       })
     } finally {
@@ -171,9 +182,9 @@ export default function VerificationsPage() {
       setSelectedUser(null)
       setRejectionReason('')
       fetchAllUsers() // Refresh the list
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting verification:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Error rejecting verification'
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unknown error occurred'
       toast({
         title: '❌ Rejection Failed',
         description: errorMessage,
@@ -375,58 +386,77 @@ export default function VerificationsPage() {
               </div>
 
               {/* Verification Documents */}
-              {(selectedUser.unsafeMetadata?.verificationDocuments || selectedUser.unsafeMetadata?.verificationStatus === 'pending') && (
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Verification Documents
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Document Front */}
-                    {selectedUser.unsafeMetadata?.verificationDocuments?.documentFront && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold">ID Front</Label>
-                        <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-                          <img 
-                            src={selectedUser.unsafeMetadata.verificationDocuments.documentFront} 
-                            alt="Document Front" 
-                            className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => window.open(selectedUser.unsafeMetadata.verificationDocuments.documentFront, '_blank')}
-                          />
-                        </div>
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Verification Documents
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Document Front */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">ID Front</Label>
+                    {selectedUser.unsafeMetadata?.verificationDocuments?.documentFront ? (
+                      <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                        <img 
+                          src={selectedUser.unsafeMetadata.verificationDocuments.documentFront} 
+                          alt="Document Front" 
+                          className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(selectedUser.unsafeMetadata.verificationDocuments.documentFront, '_blank')}
+                          onError={(e) => {
+                            console.error('Error loading document front image:', selectedUser.unsafeMetadata.verificationDocuments.documentFront)
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Not uploaded</p>
                       </div>
                     )}
-                    {/* Document Back */}
-                    {selectedUser.unsafeMetadata?.verificationDocuments?.documentBack && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold">ID Back</Label>
-                        <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-                          <img 
-                            src={selectedUser.unsafeMetadata.verificationDocuments.documentBack} 
-                            alt="Document Back" 
-                            className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => window.open(selectedUser.unsafeMetadata.verificationDocuments.documentBack, '_blank')}
-                          />
-                        </div>
+                  </div>
+                  {/* Document Back */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">ID Back</Label>
+                    {selectedUser.unsafeMetadata?.verificationDocuments?.documentBack ? (
+                      <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                        <img 
+                          src={selectedUser.unsafeMetadata.verificationDocuments.documentBack} 
+                          alt="Document Back" 
+                          className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(selectedUser.unsafeMetadata.verificationDocuments.documentBack, '_blank')}
+                          onError={(e) => {
+                            console.error('Error loading document back image:', selectedUser.unsafeMetadata.verificationDocuments.documentBack)
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Not uploaded</p>
                       </div>
                     )}
-                    {/* Selfie with Document */}
-                    {selectedUser.unsafeMetadata?.verificationDocuments?.selfieWithDocument && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold">Selfie with ID</Label>
-                        <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-                          <img 
-                            src={selectedUser.unsafeMetadata.verificationDocuments.selfieWithDocument} 
-                            alt="Selfie with Document" 
-                            className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => window.open(selectedUser.unsafeMetadata.verificationDocuments.selfieWithDocument, '_blank')}
-                          />
-                        </div>
+                  </div>
+                  {/* Selfie with Document */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Selfie with ID</Label>
+                    {selectedUser.unsafeMetadata?.verificationDocuments?.selfieWithDocument ? (
+                      <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                        <img 
+                          src={selectedUser.unsafeMetadata.verificationDocuments.selfieWithDocument} 
+                          alt="Selfie with Document" 
+                          className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(selectedUser.unsafeMetadata.verificationDocuments.selfieWithDocument, '_blank')}
+                          onError={(e) => {
+                            console.error('Error loading selfie image:', selectedUser.unsafeMetadata.verificationDocuments.selfieWithDocument)
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Not uploaded</p>
                       </div>
                     )}
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Rejection Reason Input */}
               {selectedUser.unsafeMetadata?.verificationStatus !== 'approved' && (
