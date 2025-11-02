@@ -173,9 +173,10 @@ export default function VerificationsPage() {
       fetchAllUsers() // Refresh the list
     } catch (error) {
       console.error('Error rejecting verification:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Error rejecting verification'
       toast({
         title: '❌ Rejection Failed',
-        description: 'Error rejecting verification',
+        description: errorMessage,
         variant: 'destructive',
       })
     } finally {
